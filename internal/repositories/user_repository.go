@@ -6,13 +6,15 @@ import (
 
 	"github.com/rosariocannavo/go_auth/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepository interface {
-	FindUser(user *models.User) (*models.User, error)
+	FindUser(username string) (*models.User, error)
 	CreateUser(user *models.User) error
 	CheckIfUserIsPresent(username string) (bool, error)
+	UpdateUserNonce(userID primitive.ObjectID, newNonce string) error
 	// Other user-related methods...
 }
 
@@ -26,11 +28,11 @@ func NewUserRepository(client *mongo.Client) UserRepository {
 	}
 }
 
-func (r *userRepo) FindUser(user *models.User) (*models.User, error) {
+func (r *userRepo) FindUser(username string) (*models.User, error) {
 	collection := r.client.Database("my_database").Collection("users")
 	// Logic to fetch user from the database using MongoDB
 	var retrievedUser models.User
-	filter := bson.M{"username": user.Username}
+	filter := bson.M{"username": username}
 	err := collection.FindOne(context.Background(), filter).Decode(&retrievedUser)
 	if err != nil {
 		return nil, err
@@ -65,6 +67,24 @@ func (r *userRepo) CheckIfUserIsPresent(username string) (bool, error) {
 	}
 
 	return true, nil // User found
+}
+
+// TODO: fix this function
+func (r *userRepo) UpdateUserNonce(userID primitive.ObjectID, newNonce string) error {
+
+	fmt.Println("updating nonce for ", userID)
+	collection := r.client.Database("my_database").Collection("users")
+
+	filter := bson.M{"_id": userID} // Assuming userID is the unique identifier for the user
+	update := bson.M{"$set": bson.M{"nonce": newNonce}}
+
+	_, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		fmt.Println("Error updating document:", err)
+		return err
+	}
+
+	return nil
 }
 
 // Implement other methods for user-related operations using MongoDB...

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./css/styles.css">
+
+  <title>Login/Register Form</title>
+</head>
+<body>
+
+<div class="container">
+  <div id="registerFormDiv" class="form">
+    <h2>Register</h2>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="usernameRegister">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="passwordRegister" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="passwordConfirm">Confirm Password:</label>
+        <input type="password" id="passwordConfirm" name="passwordConfirm" required>
+      </div>
+      <button type="submit">Register</button>
+    </form>
+  </div>
+  <div id="response"></div>
+  
+  <p>Aldready registered? <a href="/" class="signup-button">Login</a></p>
+</div>
+
+<script src="./js/signup.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</body>
+</html>
