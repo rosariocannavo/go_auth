@@ -67,8 +67,8 @@ func main() {
 		adminRoutes.GET("/data" /*middleware.Authenticate(),*/, handlers.GetAdminData)
 	}
 
-	//TODO: Testing
-	r.GET("/app/*proxyPath", handlers.ProxyHandler) //handler of the proxyy
+	//TODO: this route use the proxy + cb
+	r.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler) //handler of the proxyy
 
 	// Run the server
 	_ = r.Run(":8080")

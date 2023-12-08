@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rosariocannavo/go_auth/config"
 	"github.com/rosariocannavo/go_auth/internal/models"
 	"github.com/sony/gobreaker"
 )
@@ -33,7 +34,19 @@ func init() {
 	})
 }
 
-func handler(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Request) int {
+func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) *httputil.ReverseProxy {
+	proxy := httputil.NewSingleHostReverseProxy(remote)
+	proxy.Director = func(req *http.Request) {
+		req.Header = headers
+		req.Host = remote.Host
+		req.URL.Scheme = remote.Scheme
+		req.URL.Host = remote.Host
+		req.URL.Path = proxyPath
+	}
+	return proxy
+}
+
+func handleResponse(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Request) int {
 	rrw := models.NewResponseRecorderWriter(w)
 	proxy.ServeHTTP(rrw, r)
 	capturedResponse := rrw.Body.String()
@@ -43,23 +56,15 @@ func handler(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Reques
 }
 
 func ProxyHandler(c *gin.Context) {
-	remote, err := url.Parse("http://localhost:8081") //original server back the proxy TODO: MAKE THIS AS A VARIABLE
+	remote, err := url.Parse(config.Destination) //original server back the proxy TODO: MAKE THIS AS A VARIABLE
 	if err != nil {
 		panic(err)
 	}
 
-	proxy := httputil.NewSingleHostReverseProxy(remote)
-	proxy.Director = func(req *http.Request) {
-		req.Header = c.Request.Header
-		req.Host = remote.Host
-		req.URL.Scheme = remote.Scheme
-		req.URL.Host = remote.Host
-		req.URL.Path = c.Param("proxyPath")
-
-	}
+	proxy := createReverseProxy(remote, c.Request.Header, c.Param("proxyPath"))
 
 	_, errcb := cb.Execute(func() (interface{}, error) {
-		status := handler(proxy, c.Writer, c.Request)
+		status := handleResponse(proxy, c.Writer, c.Request)
 		fmt.Println("captured status ", status)
 		if status < 200 || status >= 300 {
 			return nil, errors.New("server error")

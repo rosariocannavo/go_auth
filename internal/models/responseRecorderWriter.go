@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// ResponseRecorderWriter is a custom ResponseWriter that captures the response (used for Proxy)
+// ResponseRecorderWriter is a custom ResponseWriter that captures the response sended by the real server to original client(used for Proxy)
 type ResponseRecorderWriter struct {
 	http.ResponseWriter
 	Body        *bytes.Buffer

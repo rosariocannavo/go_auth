@@ -1,3 +1,4 @@
+
 document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
     
@@ -97,8 +98,10 @@ async function requestMetaMaskSignature(nonce) {
 
             const response = await fetch('/verify-signature', requestOptions);
             const data = await response.json();
+            const token = data.token
+            localStorage.setItem('jwtToken', token);
+
             console.log('Verification Response:', data);
-            
             // Handle the response from the backend as needed
         } catch (error) {
             console.error('Error:', error);
@@ -114,3 +117,34 @@ function stringToHex(str) {
     }
     return '0x' + hex;
 }
+
+
+document.getElementById("MyButton").addEventListener('click', function() {
+    
+    const token = localStorage.getItem('jwtToken');
+
+    console.log("retrieved token" + token)
+    fetch('/app/home', {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${token}` // Add Authorization header with JWT token
+        },
+       // body: json
+    })
+    .then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+    })
+    .then(data => {
+    // Process the response data here
+    console.log(data);
+    })
+    .catch(error => {
+    // Handle errors here
+    console.error('There was a problem with the fetch operation:', error);
+    });
+});
+

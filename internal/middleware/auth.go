@@ -45,7 +45,10 @@ func Authenticate() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("claims", claims)
+		//retrieve information based on the token - could do this in other client
+		fmt.Println("auth middleware")
+		fmt.Println("username", claims["username"])
+		//c.Set("claims", claims)
 
 		c.Next()
 	}
