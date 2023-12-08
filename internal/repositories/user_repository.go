@@ -72,7 +72,6 @@ func (r *userRepo) CheckIfUserIsPresent(username string) (bool, error) {
 // TODO: fix this function
 func (r *userRepo) UpdateUserNonce(userID primitive.ObjectID, newNonce string) error {
 
-	fmt.Println("updating nonce for ", userID)
 	collection := r.client.Database("my_database").Collection("users")
 
 	filter := bson.M{"_id": userID} // Assuming userID is the unique identifier for the user

@@ -79,17 +79,14 @@ async function requestMetaMaskSignature(nonce) {
             const accounts = await provider.request({ method: 'eth_requestAccounts' });
             const accountAddress = accounts[0]; // Get the first account
 
-
             const encodedMessage = stringToHex(nonce);
-
 
             const signature = await provider.request({
                 method: 'personal_sign',
                 params: [encodedMessage, accountAddress],
                });
             
-               console.log(signature)
-
+            console.log(signature)
 
             // Send the signed message and Ethereum address to the backend
             const requestOptions = {

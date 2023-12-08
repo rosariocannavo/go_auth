@@ -50,6 +50,7 @@ func main() {
 	//metamask signature verification endpoint
 	r.POST("/verify-signature", handlers.HandleverifySignature)
 
+	//all this logic must be in the other service and protected by proxy
 	//Protected middleware User endpoints
 	userRoutes := r.Group("/users")
 	userRoutes.Use(middleware.Authenticate())
@@ -65,6 +66,9 @@ func main() {
 	{
 		adminRoutes.GET("/data" /*middleware.Authenticate(),*/, handlers.GetAdminData)
 	}
+
+	//TODO: Testing
+	r.GET("/app/*proxyPath", handlers.ProxyHandler) //handler of the proxyy
 
 	// Run the server
 	_ = r.Run(":8080")
