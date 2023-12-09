@@ -33,6 +33,8 @@ func main() {
 
 	fmt.Println("Connected to MongoDB!")
 
+	r.Use(middleware.NewRateLimitMiddleware("localhost:6379").Handler()) //my-redis
+
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
@@ -67,7 +69,7 @@ func main() {
 		adminRoutes.GET("/data" /*middleware.Authenticate(),*/, handlers.GetAdminData)
 	}
 
-	//TODO: this route use the proxy + cb
+	//TODO: this route use the proxy + cb launched by button in login
 	r.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler) //handler of the proxyy
 
 	// Run the server

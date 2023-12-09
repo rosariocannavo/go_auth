@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+
+  my-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - go_network
+
   mongo_db:
     image: mongo:4.2.12
     environment:

@@ -60,6 +60,11 @@ func HandleRegistration(c *gin.Context) {
 		user.Password = hashedPwd
 		user.MetamaskAddress = userForm.MetamaskAddress
 		user.Nonce = nonce
+		if int(nonce[0])%2 == 0 {
+			user.Role = models.Admin
+		} else {
+			user.Role = models.NormalUser
+		}
 
 		userRepo.CreateUser(&user)
 
