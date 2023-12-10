@@ -13,9 +13,12 @@ type RedisRateLimiter struct {
 }
 
 func SetupRedisRateLimiter(connString string) *RedisRateLimiter {
+
+	//TODO move to init
 	client := redis.NewClient(&redis.Options{
 		Addr: connString,
 	})
+	//
 	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
 		log.Fatal("Error connecting to Redis:", err)

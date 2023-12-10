@@ -10,6 +10,18 @@ services:
     networks:
       - go_network
 
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081" # Adjust the port as needed
+    environment:
+      - REDIS_HOSTS=my-redis
+    restart: unless-stopped
+    networks:
+      - go_network
+
+
   mongo_db:
     image: mongo:4.2.12
     environment:
@@ -22,6 +34,7 @@ services:
       - "27017:27017"
     networks:
       - go_network
+
 
   mongo_express:
     image: mongo-express:0.54.0
@@ -40,6 +53,7 @@ services:
       - mongo_db
     networks:
       - go_network
+
 
   # app:
   #   build:

@@ -65,9 +65,9 @@ func HandleverifySignature(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("mesg " + requestData.Nonce)
-	fmt.Println("addr " + requestData.Address)
-	fmt.Println("sig " + requestData.Signature + "\n")
+	// fmt.Println("mesg " + requestData.Nonce)
+	// fmt.Println("addr " + requestData.Address)
+	// fmt.Println("sig " + requestData.Signature + "\n")
 
 	isSignatureVerified := utils.CheckSig(requestData.Address, requestData.Signature, []byte(requestData.Nonce))
 

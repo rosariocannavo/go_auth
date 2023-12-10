@@ -47,7 +47,6 @@ func GenerateRandomNonce() (string, error) {
 		return "", err
 	}
 
-	fmt.Println(nonce)
 	// Encode the random bytes to a hexadecimal string
 	nonceString := "0x" + hex.EncodeToString(nonce)
 
