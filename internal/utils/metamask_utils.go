@@ -36,7 +36,7 @@ func CheckSig(from, sigHex string, msg []byte) bool {
 
 func GenerateRandomNonce() (string, error) {
 	// Define the length of the nonce
-	nonceLength := 16 // You can adjust the length as needed
+	nonceLength := 16
 
 	// Create a byte slice to store the random nonce
 	nonce := make([]byte, nonceLength)

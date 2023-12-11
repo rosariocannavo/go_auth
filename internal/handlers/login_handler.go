@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	auth "github.com/rosariocannavo/go_auth/config"
+	"github.com/rosariocannavo/go_auth/config"
 	"github.com/rosariocannavo/go_auth/internal/db"
 	"github.com/rosariocannavo/go_auth/internal/models"
 	"github.com/rosariocannavo/go_auth/internal/repositories"
@@ -72,7 +72,6 @@ func HandleverifySignature(c *gin.Context) {
 	isSignatureVerified := utils.CheckSig(requestData.Address, requestData.Signature, []byte(requestData.Nonce))
 
 	if isSignatureVerified {
-
 		// Generate JWT token upon successful authentication
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"id":              retrievedUser.ID,
@@ -84,7 +83,7 @@ func HandleverifySignature(c *gin.Context) {
 			"exp": time.Now().Add(time.Hour * 24).Unix(),
 		})
 
-		tokenString, err := token.SignedString(auth.SecretKey)
+		tokenString, err := token.SignedString(config.JWTSecretKey)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 			return

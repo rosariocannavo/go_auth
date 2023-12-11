@@ -19,12 +19,15 @@ type LoginDetails struct {
 }
 
 func main() {
+
 	r := gin.Default()
 
+	// Load Static files
 	r.LoadHTMLGlob("../../templates/*.html")
 	r.Static("/css", "../../templates/css")
 	r.Static("/js", "../../templates/js")
 
+	// Connect to DB
 	err := db.ConnectDB()
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +36,7 @@ func main() {
 
 	fmt.Println("Connected to MongoDB!")
 
-	r.Use(middleware.NewRateLimitMiddleware("localhost:6379").Handler()) //my-redis
+	r.Use(middleware.NewRateLimitMiddleware().Handler()) //my-redis
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})

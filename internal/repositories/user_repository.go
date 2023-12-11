@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/rosariocannavo/go_auth/internal/models"
+	"github.com/rosariocannavo/go_auth/internal/redis_handler"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,22 +17,13 @@ type UserRepository interface {
 	CreateUser(user *models.User) error
 	CheckIfUserIsPresent(username string) (bool, error)
 	UpdateUserNonce(userID primitive.ObjectID, newNonce string) error
-	// Other user-related methods...
 }
 
 type userRepo struct {
 	client *mongo.Client
 }
 
-var redisClient *redis.Client
-
 func NewUserRepository(client *mongo.Client) UserRepository {
-
-	//TODO move to init and unify with ratelimiter
-	redisClient = redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", "localhost", "6379"),
-	})
-	//
 	return &userRepo{
 		client: client,
 	}
@@ -44,7 +35,7 @@ func (r *userRepo) FindUser(username string) (*models.User, error) {
 	collection := r.client.Database("my_database").Collection("users")
 
 	// Logic to fetch user from redis if present
-	cachedData, errred := redisClient.Get(context.Background(), username).Bytes() //change with id
+	cachedData, errred := redis_handler.Client.Get(context.Background(), username).Bytes()
 	if errred != nil {
 		log.Print(errred)
 	}
@@ -69,7 +60,7 @@ func (r *userRepo) FindUser(username string) (*models.User, error) {
 		}
 
 		// Cache the data in Redis
-		err = redisClient.Set(context.Background(), retrievedUser.Username, dataBytes, 0).Err()
+		err = redis_handler.Client.Set(context.Background(), retrievedUser.Username, dataBytes, 0).Err()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -106,13 +97,11 @@ func (r *userRepo) CheckIfUserIsPresent(username string) (bool, error) {
 	return true, nil // User found
 }
 
-// TODO: fix this function
-// no redis here cause i need to write
 func (r *userRepo) UpdateUserNonce(userID primitive.ObjectID, newNonce string) error {
 
 	collection := r.client.Database("my_database").Collection("users")
 
-	filter := bson.M{"_id": userID} // Assuming userID is the unique identifier for the user
+	filter := bson.M{"_id": userID}
 	update := bson.M{"$set": bson.M{"nonce": newNonce}}
 
 	_, err := collection.UpdateOne(context.Background(), filter, update)
@@ -124,5 +113,4 @@ func (r *userRepo) UpdateUserNonce(userID primitive.ObjectID, newNonce string) e
 	return nil
 }
 
-//TO a delete, remember to update the cache
-// Implement other methods for user-related operations using MongoDB...
+//for a delete, remember to update the cache

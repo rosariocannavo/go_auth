@@ -6,36 +6,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rosariocannavo/go_auth/config"
+	"github.com/rosariocannavo/go_auth/internal/circuit_breaker"
 	"github.com/rosariocannavo/go_auth/internal/models"
-	"github.com/sony/gobreaker"
 )
-
-var cb *gobreaker.CircuitBreaker
-
-// TODO: separate cb and proxy
-func init() {
-	cb = gobreaker.NewCircuitBreaker(gobreaker.Settings{
-		Name:        "My Circuit Breaker",
-		MaxRequests: 0,               // Maximum number of consecutive failures before tripping the circuit
-		Interval:    5 * time.Second, // Duration to wait before allowing another request
-		Timeout:     2 * time.Second, // Timeout for a single request attempt
-		ReadyToTrip: func(counts gobreaker.Counts) bool {
-			// failureRatio := float64(counts.TotalFailures) / float64(counts.Requests)
-			// return counts.Requests >= 3 && failureRatio >= 0.6 // Trips the circuit if failure rate exceeds 60%
-			return counts.ConsecutiveFailures > 3
-		},
-		OnStateChange: func(name string, from gobreaker.State, to gobreaker.State) {
-			fmt.Printf("Circuit breaker '%s' changed from '%s' to '%s'\n", name, from, to)
-		},
-	})
-}
 
 func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) *httputil.ReverseProxy {
 	proxy := httputil.NewSingleHostReverseProxy(remote)
+
 	proxy.Director = func(req *http.Request) {
 		req.Header = headers
 		req.Host = remote.Host
@@ -43,29 +23,36 @@ func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) 
 		req.URL.Host = remote.Host
 		req.URL.Path = proxyPath
 	}
+
 	return proxy
 }
 
+// real handler
 func handleResponse(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Request) int {
 	rrw := models.NewResponseRecorderWriter(w)
 	proxy.ServeHTTP(rrw, r)
 	capturedResponse := rrw.Body.String()
 	capturedStatus := rrw.StatusCode
-	fmt.Println("caputer response", capturedResponse)
+	fmt.Println("captuter response", capturedResponse)
 	return capturedStatus
 }
 
+// wrap handler inside circuit breaker
 func ProxyHandler(c *gin.Context) {
-	remote, err := url.Parse(config.Destination) //original server back the proxy TODO: MAKE THIS AS A VARIABLE
+
+	remote, err := url.Parse(config.ProxyDestination)
+
 	if err != nil {
 		panic(err)
 	}
 
 	proxy := createReverseProxy(remote, c.Request.Header, c.Param("proxyPath"))
 
-	_, errcb := cb.Execute(func() (interface{}, error) {
+	_, errcb := circuit_breaker.CircuitBreaker.Execute(func() (interface{}, error) { //circuite breaker here
+
 		status := handleResponse(proxy, c.Writer, c.Request)
 		fmt.Println("captured status ", status)
+
 		if status < 200 || status >= 300 {
 			return nil, errors.New("server error")
 		}

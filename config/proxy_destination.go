@@ -1,3 +1,3 @@
 package config
 
-var Destination string = "http://localhost:8081"
+var ProxyDestination string = "http://localhost:8082"

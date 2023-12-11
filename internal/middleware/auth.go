@@ -23,7 +23,7 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return auth.SecretKey, nil
+			return auth.JWTSecretKey, nil
 		})
 
 		if err != nil || !token.Valid {

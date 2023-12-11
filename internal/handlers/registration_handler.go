@@ -14,6 +14,7 @@ func HandleRegistration(c *gin.Context) {
 	userRepo := repositories.NewUserRepository(db.Client)
 
 	var userForm models.UserForm
+
 	//retrieve the partial user information from form
 	if err := c.BindJSON(&userForm); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
@@ -29,8 +30,10 @@ func HandleRegistration(c *gin.Context) {
 	}
 
 	if isPresent {
+
 		c.JSON(http.StatusForbidden, gin.H{"error": "User already present"})
 		return
+
 	} else {
 
 		//if user is not present
@@ -40,7 +43,7 @@ func HandleRegistration(c *gin.Context) {
 
 		var user models.User
 
-		//hash the user password
+		// hash the user password
 		hashedPwd, err := utils.HashPassword(userForm.Password)
 
 		if err != nil {
@@ -48,7 +51,7 @@ func HandleRegistration(c *gin.Context) {
 			return
 		}
 
-		//generate nonce for metamask sign auth
+		// generate nonce for metamask sign auth
 		nonce, err := utils.GenerateRandomNonce()
 
 		if err != nil {
@@ -60,14 +63,17 @@ func HandleRegistration(c *gin.Context) {
 		user.Password = hashedPwd
 		user.MetamaskAddress = userForm.MetamaskAddress
 		user.Nonce = nonce
+
+		// generate role based on nonce
 		if int(nonce[0])%2 == 0 {
 			user.Role = models.Admin
 		} else {
 			user.Role = models.NormalUser
 		}
 
+		// write the user in the database
 		userRepo.CreateUser(&user)
 
-		c.JSON(http.StatusOK, gin.H{"message": "user created succesfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "user registered succesfully"})
 	}
 }

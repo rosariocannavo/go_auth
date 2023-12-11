@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	db "github.com/rosariocannavo/go_auth/config"
+	"github.com/rosariocannavo/go_auth/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,7 +13,7 @@ import (
 var Client *mongo.Client
 
 func ConnectDB() error {
-	clientOptions := options.Client().ApplyURI(db.Uri)
+	clientOptions := options.Client().ApplyURI(config.MongoUri)
 
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
