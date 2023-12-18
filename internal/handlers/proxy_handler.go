@@ -13,6 +13,7 @@ import (
 	"github.com/rosariocannavo/go_auth/internal/models"
 )
 
+// TODO: put initialization in a separated file
 func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) *httputil.ReverseProxy {
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 
@@ -46,7 +47,7 @@ func ProxyHandler(c *gin.Context) {
 		panic(err)
 	}
 
-	proxy := createReverseProxy(remote, c.Request.Header, c.Param("proxyPath"))
+	proxy := createReverseProxy(remote, c.Request.Header, c.Param("proxyPath")) //redirect the request to  the proxy
 
 	_, errcb := circuit_breaker.CircuitBreaker.Execute(func() (interface{}, error) { //circuite breaker here
 

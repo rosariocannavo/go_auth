@@ -5,40 +5,64 @@ document.getElementById("registerForm").addEventListener("submit", async functio
     const formData = new FormData(this); // 'this' refers to the form element
     const metamaskAddress = await getMetaMaskAddress(); 
 
-    //TODO: check password and confirm password
-    if (metamaskAddress !== null) {
-        formData.append("metamaskAddress", metamaskAddress);
 
-        var object = {};
-        formData.forEach(function(value, key){
-            if(key != 'passwordConfirm') 
-                object[key] = value;
-        });
-        var json = JSON.stringify(object);
+    const password = formData.get('password'); 
+    const confirmPassword = formData.get('passwordConfirm');
+
+    console.log("pwd:" + password);
+    console.log("confirm pwd:" + confirmPassword);
+
+    if (password === confirmPassword) {
+        document.getElementById('response').innerHTML = '<p>Passwords match!</p>';
+
+        document.getElementById('passwordRegister').style.border = '2px solid green';
+        document.getElementById('passwordConfirm').style.border = '2px solid green';
+
+        if (metamaskAddress !== null) {
+            formData.append("metamaskAddress", metamaskAddress);
+
+            var object = {};
+            formData.forEach(function(value, key){
+                if(key != 'passwordConfirm') 
+                    object[key] = value;
+            });
+            var json = JSON.stringify(object);
+            
+            console.log(json)
+
+            // Send POST request to your Go Gin server
+            fetch("/registration", {
+                method: "POST",
+                //body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: json
+    
+            })
+            .then(response => {
+                // Handle the response as needed
+                console.log(response);
+                window.location.href = '/';
+
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+
+            
+        } else {
+            console.error("Metamask address not available");
+            // Handle the case when Metamask address is not available
+        }
+
         
-        console.log(json)
-
-        // Send POST request to your Go Gin server
-        fetch("/registration", {
-            method: "POST",
-            //body: formData
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: json
- 
-        })
-        .then(response => {
-            // Handle the response as needed
-            console.log(response);
-            // You can redirect or perform other actions based on the response
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
     } else {
-        console.error("Metamask address not available");
-        // Handle the case when Metamask address is not available
+        document.getElementById('passwordRegister').style.border = '2px solid red';
+        document.getElementById('passwordConfirm').style.border = '2px solid red';
+
+        // Display error message
+        document.getElementById('response').innerHTML = '<p>Passwords do not match. Please re-enter.</p>';
     }
 });
 

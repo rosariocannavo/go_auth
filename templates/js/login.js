@@ -1,9 +1,10 @@
+var metamaskAddress  = null;
 
 document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault();
     
     const formData = new FormData(this); // 'this' refers to the form element
-    const metamaskAddress = await getMetaMaskAddress(); 
+    metamaskAddress = await getMetaMaskAddress(); 
 
     if (metamaskAddress !== null) {
         formData.append("metamaskAddress", metamaskAddress);
@@ -124,7 +125,12 @@ document.getElementById("MyButton").addEventListener('click', function() {
     const token = localStorage.getItem('jwtToken');
 
     console.log("retrieved token" + token)
-    fetch('/app/home', {
+
+    const newValue = Math.floor(Math.random() * (100 - 1)) + 1;
+    console.log(newValue)
+    
+
+    fetch(`/app/interactWithContract?account=${metamaskAddress}&newvalue=${newValue}`, {
         method: "GET",
         headers: {
             'Content-Type': 'application/json',

@@ -46,6 +46,10 @@ func main() {
 		c.HTML(http.StatusOK, "signup.html", gin.H{})
 	})
 
+	r.GET("/home", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "home.html", gin.H{})
+	})
+
 	// Login endpoint
 	r.POST("/login", handlers.HandleLogin)
 

@@ -49,4 +49,8 @@ body {
   button:hover {
     background-color: #0056b3;
   }
+
+  .password-error {
+    border: 2px solid red;
+}
   
