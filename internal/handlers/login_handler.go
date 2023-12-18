@@ -97,6 +97,21 @@ func HandleverifySignature(c *gin.Context) {
 
 		userRepo.UpdateUserNonce(retrievedUser.ID, nonce)
 
+		//set cookie for the session
+		jwtCookie := &http.Cookie{
+			Name:  "jwtToken",
+			Value: tokenString,
+			Path:  "/",
+		}
+		http.SetCookie(c.Writer, jwtCookie)
+
+		accountCookie := &http.Cookie{
+			Name:  "accountAddress",
+			Value: retrievedUser.MetamaskAddress,
+			Path:  "/",
+		}
+		http.SetCookie(c.Writer, accountCookie)
+
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 
 	} else {

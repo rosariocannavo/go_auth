@@ -12,12 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginDetails struct {
-	UsernameLogin   string `json:"usernameLogin"`
-	PasswordLogin   string `json:"passwordLogin"`
-	MetamaskAddress string `json:"metamaskAddress"`
-}
-
 func main() {
 
 	r := gin.Default()
@@ -36,7 +30,7 @@ func main() {
 
 	fmt.Println("Connected to MongoDB!")
 
-	r.Use(middleware.NewRateLimitMiddleware().Handler()) //my-redis
+	r.Use(middleware.NewRateLimitMiddleware().Handler())
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
@@ -49,6 +43,9 @@ func main() {
 	r.GET("/home", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "home.html", gin.H{})
 	})
+
+	// Cookie endpoint to retrieve account and jwt
+	r.GET("/get-cookie", handlers.GetCookieHandler)
 
 	// Login endpoint
 	r.POST("/login", handlers.HandleLogin)

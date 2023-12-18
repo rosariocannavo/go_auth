@@ -17,27 +17,44 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         
         console.log(json)
 
-        // Send POST request to your Go Gin server
+        // Send POST request to Go Gin server
         fetch("/login", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: json
- 
         })
         .then(response => {
-            return response.json(); // Parse the response body as JSON
+            if (response.status === 401) {
+                console.log("Unauthorized");
+                document.getElementById('password').style.border = '2px solid red';
+                document.getElementById('password').value = '';
+                document.getElementById('response').innerHTML = '<p>Passwords Incorrect. Please retry.</p>';
+
+                throw new Error("Unauthorized");
+            } else {
+                document.getElementById('password').style.border = '2px solid green';
+                document.getElementById('response').innerHTML = '<p>Passwords Checked. Metamask redirect.</p>';
+
+            }
+            
+            return response.json();
         })
         .then(data => {
-            // Access the 'Nonce' value from the response data
             const nonce = data.Nonce;
-            console.log("nonce" + nonce)
-            requestMetaMaskSignature(nonce)
-            // Use the 'nonce' value as needed
+            console.log("Nonce: " + nonce);
+            requestMetaMaskSignature(nonce);
         })
         .catch(error => {
-            // Handle any errors that occurred during the fetch
+            if (error.message === "Unauthorized") {
+                console.log("Unauthorized request");
+                // Handle unauthorized error here (e.g., show a message to the user)
+            } else {
+                console.error("Generic error occurred:", error);
+                // Handle other generic errors (e.g., display a generic error message)
+                // Inform the user or perform necessary actions for unexpected errors
+            }
         });
 
 
@@ -81,6 +98,8 @@ async function requestMetaMaskSignature(nonce) {
             const accounts = await provider.request({ method: 'eth_requestAccounts' });
             const accountAddress = accounts[0]; // Get the first account
 
+            sessionStorage.setItem('accountAddress', accountAddress);
+
             const encodedMessage = stringToHex(nonce);
 
             const signature = await provider.request({
@@ -97,12 +116,41 @@ async function requestMetaMaskSignature(nonce) {
                 body: JSON.stringify({ message: nonce, address: accountAddress, signature: signature }),
             };
 
-            const response = await fetch('/verify-signature', requestOptions);
-            const data = await response.json();
-            const token = data.token
-            localStorage.setItem('jwtToken', token);
+            const response = await fetch('/verify-signature', requestOptions)
+            if (response.ok) {
+                const data = await response.json();
+                const token = data.token;
+            
+                localStorage.setItem('jwtToken', token);
+            
+                console.log('Verification Response:', data);
+            
+            
+            } else {
+                throw new Error('Network response was not ok.');
+            }
 
-            console.log('Verification Response:', data);
+            try {
+
+                const jwtToken = localStorage.getItem('jwtToken');
+
+                const response = await fetch('/home', {
+                    method: 'GET',
+                    headers: {
+                    'Authorization': `${jwtToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    // If the response is successful, you can navigate to the '/home' page
+                    window.location.href = '/home';
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+                } catch (error) {
+                // Handle any errors during fetch or navigation
+                console.error('Fetch error:', error);
+                }
             // Handle the response from the backend as needed
         } catch (error) {
             console.error('Error:', error);
@@ -118,39 +166,4 @@ function stringToHex(str) {
     }
     return '0x' + hex;
 }
-
-
-document.getElementById("MyButton").addEventListener('click', function() {
-    
-    const token = localStorage.getItem('jwtToken');
-
-    console.log("retrieved token" + token)
-
-    const newValue = Math.floor(Math.random() * (100 - 1)) + 1;
-    console.log(newValue)
-    
-
-    fetch(`/app/interactWithContract?account=${metamaskAddress}&newvalue=${newValue}`, {
-        method: "GET",
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `${token}` // Add Authorization header with JWT token
-        },
-       // body: json
-    })
-    .then(response => {
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return response.json();
-    })
-    .then(data => {
-    // Process the response data here
-    console.log(data);
-    })
-    .catch(error => {
-    // Handle errors here
-    console.error('There was a problem with the fetch operation:', error);
-    });
-});
 
