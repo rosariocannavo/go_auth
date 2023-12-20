@@ -33,10 +33,20 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
                 document.getElementById('response').innerHTML = '<p>Passwords Incorrect. Please retry.</p>';
 
                 throw new Error("Unauthorized");
-            } else {
+
+            } else if(response.status === 400) {
+                console.log("user not present");
+                document.getElementById('password').style.border = '2px solid red';
+                document.getElementById('username').style.border = '2px solid red';
+                document.getElementById('password').value = '';
+                document.getElementById('username').value = '';
+                document.getElementById('response').innerHTML = '<p>User not found. Please retry.</p>';
+
+                throw new Error("User not present");
+
+            }else {
                 document.getElementById('password').style.border = '2px solid green';
                 document.getElementById('response').innerHTML = '<p>Passwords Checked. Metamask redirect.</p>';
-
             }
             
             return response.json();
@@ -120,8 +130,11 @@ async function requestMetaMaskSignature(nonce) {
             if (response.ok) {
                 const data = await response.json();
                 const token = data.token;
+                const role = data.role;
             
                 localStorage.setItem('jwtToken', token);
+                localStorage.setItem('role', role);
+
             
                 console.log('Verification Response:', data);
             
@@ -133,24 +146,72 @@ async function requestMetaMaskSignature(nonce) {
             try {
 
                 const jwtToken = localStorage.getItem('jwtToken');
-
-                const response = await fetch('/home', {
-                    method: 'GET',
-                    headers: {
-                    'Authorization': `${jwtToken}`
-                    }
-                });
+                const role = localStorage.getItem('role');
+                console.log(jwtToken)
+                if(role == "admin") {
+                    const response = await fetch('/admin/admin_home', {
+                        method: 'GET',
+                        headers: {
+                        'Authorization': `${jwtToken}`
+                        }
+                    });
+                    if (response.ok) {
+                        // If the response status is in the range 200-299
+                        const htmlContent = await response.text();
                 
-                if (response.ok) {
-                    // If the response is successful, you can navigate to the '/home' page
-                    window.location.href = '/home';
+                        //Update the content of a specific HTML element with the fetched HTML
+                        document.open();
+                        document.write(htmlContent);
+                        document.close();
+                    }  else if (response.status >= 400 && response.status < 500) {
+                        // Handle client-side errors (4xx errors)
+                        // For example, display an error message or handle accordingly
+                        console.error('Client-side error:', response.status);
+                    } else if (response.status >= 500 && response.status < 600) {
+                        // Handle server-side errors (5xx errors)
+                        // For example, display an error message or handle accordingly
+                        console.error('Server-side error:', response.status);
+                    } else {
+                        // Handle other cases where response.ok is false but the status code is not in 4xx or 5xx range
+                        console.error('Unexpected error:', response.status);
+                    }
+
                 } else {
-                    throw new Error('Network response was not ok.');
+
+                    const response = await fetch('/user/user_home', {
+                        method: 'GET',
+                        headers: {
+                        'Authorization': `${jwtToken}`
+                        }
+                    });
+                    if (response.ok) {
+                        // If the response status is in the range 200-299
+                        const htmlContent = await response.text();
+                
+                        //Update the content of a specific HTML element with the fetched HTML
+                        document.open();
+                        document.write(htmlContent);
+                        document.close();
+
+                    } else if (response.status >= 400 && response.status < 500) {
+                        // Handle client-side errors (4xx errors)
+                        // For example, display an error message or handle accordingly
+                        console.error('Client-side error:', response.status);
+                    } else if (response.status >= 500 && response.status < 600) {
+                        // Handle server-side errors (5xx errors)
+                        // For example, display an error message or handle accordingly
+                        console.error('Server-side error:', response.status);
+                    } else {
+                        // Handle other cases where response.ok is false but the status code is not in 4xx or 5xx range
+                        console.error('Unexpected error:', response.status);
+                    }
                 }
-                } catch (error) {
+                
+
+            } catch (error) {
                 // Handle any errors during fetch or navigation
                 console.error('Fetch error:', error);
-                }
+            }
             // Handle the response from the backend as needed
         } catch (error) {
             console.error('Error:', error);

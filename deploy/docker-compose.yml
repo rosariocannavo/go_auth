@@ -67,6 +67,27 @@ services:
   #     - go_network
   #   restart: always
 
+  # ganache:
+  #   image: trufflesuite/ganache-cli:latest
+  #   ports:
+  #     - "8545:8545"  # Expose Ganache RPC port
+  #   command: >
+  #     --account="0x39573730f7a6330869d9395c553fe17c4e2d95378b8c56e3e6bf818bbc8261f1,100000000000000000000" 
+
+  #   networks:
+  #     - go_network
+
+  # truffle:
+  #   build: 
+  #     context: ./truffleDeploy
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - go_network
+  #   depends_on:
+  #     - ganache
+  #   #working_dir: /usr/src/app
+  #   command: truffle migrate --network development
+
 networks:
   go_network:
     driver: bridge

@@ -11,8 +11,6 @@ func RoleAuth(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, ok := c.MustGet("claims").(jwt.MapClaims)
 
-		c.Set("username", claims["username"].(string))
-
 		if !ok {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid token claims"})
 			c.Abort()

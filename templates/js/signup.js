@@ -43,8 +43,18 @@ document.getElementById("registerForm").addEventListener("submit", async functio
             .then(response => {
                 // Handle the response as needed
                 console.log(response);
-                window.location.href = '/';
+                if(response.status === 403) {
+                    console.log("user already present");
+                    document.getElementById('username').style.border = '2px solid red';
+                    document.getElementById('passwordRegister').style.border = '2px solid red';
+                    document.getElementById('passwordConfirm').style.border = '2px solid red';
 
+            
+                    document.getElementById('response').innerHTML = '<p>User or Address already present.</p>';
+
+                } else {
+                    window.location.href = '/';
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
@@ -62,7 +72,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
         document.getElementById('passwordConfirm').style.border = '2px solid red';
 
         // Display error message
-        document.getElementById('response').innerHTML = '<p>Passwords do not match. Please re-enter.</p>';
+        document.getElementById('response').innerHTML = '<p>Passwords do not match. Please retry.</p>';
     }
 });
 

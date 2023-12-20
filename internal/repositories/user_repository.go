@@ -15,7 +15,7 @@ import (
 type UserRepository interface {
 	FindUser(username string) (*models.User, error)
 	CreateUser(user *models.User) error
-	CheckIfUserIsPresent(username string) (bool, error)
+	CheckIfUserIsPresent(username string, address string) (bool, error)
 	UpdateUserNonce(userID primitive.ObjectID, newNonce string) error
 }
 
@@ -80,21 +80,33 @@ func (r *userRepo) CreateUser(user *models.User) error {
 	return err
 }
 
-func (r *userRepo) CheckIfUserIsPresent(username string) (bool, error) {
+func (r *userRepo) CheckIfUserIsPresent(username string, address string) (bool, error) {
 	collection := r.client.Database("my_database").Collection("users")
 
 	var user models.User
-	filter := bson.M{"username": username}
-	err := collection.FindOne(context.Background(), filter).Decode(&user)
 
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return false, nil // User not found
+	filterUsername := bson.M{"username": username}
+	errUsername := collection.FindOne(context.Background(), filterUsername).Decode(&user)
+
+	if errUsername != nil {
+		if errUsername == mongo.ErrNoDocuments {
+			// Username not found
+			// Now, check if the Metamask address exists
+			filterAddress := bson.M{"metamaskaddress": address}
+			errAddress := collection.FindOne(context.Background(), filterAddress).Decode(&user)
+
+			if errAddress != nil {
+				if errAddress == mongo.ErrNoDocuments {
+					return false, nil // User not found by either username or address
+				}
+				return false, errAddress // Other error occurred while checking by address
+			}
+			return true, nil // User found by address
 		}
-		return false, err // Other error occurred
+		return false, errUsername // Other error occurred while checking by username
 	}
 
-	return true, nil // User found
+	return true, nil // User found by username
 }
 
 func (r *userRepo) UpdateUserNonce(userID primitive.ObjectID, newNonce string) error {

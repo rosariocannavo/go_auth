@@ -1,9 +1,14 @@
 package handlers
 
 import (
+	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rosariocannavo/go_auth/config"
 	"github.com/rosariocannavo/go_auth/internal/db"
 	"github.com/rosariocannavo/go_auth/internal/models"
 	"github.com/rosariocannavo/go_auth/internal/repositories"
@@ -21,8 +26,9 @@ func HandleRegistration(c *gin.Context) {
 		return
 	}
 
+	fmt.Println("ADDRESS FROM REGI ", userForm.MetamaskAddress)
 	//check if the user is already registered
-	isPresent, err := userRepo.CheckIfUserIsPresent(userForm.Username)
+	isPresent, err := userRepo.CheckIfUserIsPresent(userForm.Username, userForm.MetamaskAddress)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching database"})
@@ -38,7 +44,7 @@ func HandleRegistration(c *gin.Context) {
 
 		//if user is not present
 		//hash his psw and store him in the db
-		//give him a role
+		//give him a role based on # of transaction
 		//give him a nonce
 
 		var user models.User
@@ -64,10 +70,35 @@ func HandleRegistration(c *gin.Context) {
 		user.MetamaskAddress = userForm.MetamaskAddress
 		user.Nonce = nonce
 
+		//TODO
 		// generate role based on nonce
-		if int(nonce[0])%2 == 0 {
+
+		//conta il numero di transazioni fatte
+		//payload := strings.NewReader(fmt.Sprintf(`{"jsonrpc":"2.0","method":"eth_getTransactionCount","params":["%s", "latest"],"id":1}`, userForm.MetamaskAddress))
+		payload := strings.NewReader(fmt.Sprintf(`{"jsonrpc":"2.0","method":"eth_getBalance","params":["%s", "latest"],"id":1}`, userForm.MetamaskAddress))
+
+		// Sending the HTTP POST request to the Ganache endpoint
+		resp, err := http.Post(config.GanacheURL, "application/json", payload)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer resp.Body.Close()
+
+		// Reading the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("BODY", string(body))
+
+		//per adesso vedo banalmente se l'account corrisponde a quello di ganache che ho su metamask
+		if strings.EqualFold(user.MetamaskAddress, "0x58ad8fEA5d85EDD13C05dC116198801Ff53679B2") {
+			fmt.Println("admin logger")
 			user.Role = models.Admin
 		} else {
+			fmt.Println("user logger")
+
 			user.Role = models.NormalUser
 		}
 

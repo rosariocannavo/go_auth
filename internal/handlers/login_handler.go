@@ -33,7 +33,7 @@ func HandleLogin(c *gin.Context) {
 	fmt.Println("username", userForm.Username)
 	if errdb != nil {
 		fmt.Println("USER NOT PRESENT")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not present"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User not present"})
 		return
 	}
 
@@ -97,7 +97,7 @@ func HandleverifySignature(c *gin.Context) {
 
 		userRepo.UpdateUserNonce(retrievedUser.ID, nonce)
 
-		//set cookie for the session
+		//set cookie for the session and return token to client
 		jwtCookie := &http.Cookie{
 			Name:  "jwtToken",
 			Value: tokenString,
@@ -112,7 +112,7 @@ func HandleverifySignature(c *gin.Context) {
 		}
 		http.SetCookie(c.Writer, accountCookie)
 
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+		c.JSON(http.StatusOK, gin.H{"token": tokenString, "role": retrievedUser.Role})
 
 	} else {
 
