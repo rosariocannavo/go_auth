@@ -54,6 +54,14 @@ services:
     networks:
       - go_network
 
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"  # NATS server port
+      - "6222:6222"  # NATS server cluster port
+      - "8222:8222"  # NATS server monitoring port    
+    networks:
+      - go_network
 
   # app:
   #   build:

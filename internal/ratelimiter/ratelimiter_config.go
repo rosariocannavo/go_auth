@@ -5,7 +5,7 @@ import (
 	"log"
 
 	redisrate "github.com/go-redis/redis_rate/v10"
-	"github.com/rosariocannavo/go_auth/internal/redis_handler"
+	"github.com/rosariocannavo/go_auth/internal/redis"
 )
 
 type RedisRateLimiter struct {
@@ -14,9 +14,9 @@ type RedisRateLimiter struct {
 
 func SetupRedisRateLimiter() *RedisRateLimiter {
 
-	_, err := redis_handler.Client.Ping(context.Background()).Result()
+	_, err := redis.Client.Ping(context.Background()).Result()
 	if err != nil {
 		log.Fatal("Error connecting to Redis:", err)
 	}
-	return &RedisRateLimiter{redisrate.NewLimiter(redis_handler.Client)}
+	return &RedisRateLimiter{redisrate.NewLimiter(redis.Client)}
 }

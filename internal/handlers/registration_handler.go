@@ -26,7 +26,6 @@ func HandleRegistration(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("ADDRESS FROM REGI ", userForm.MetamaskAddress)
 	//check if the user is already registered
 	isPresent, err := userRepo.CheckIfUserIsPresent(userForm.Username, userForm.MetamaskAddress)
 
@@ -94,10 +93,8 @@ func HandleRegistration(c *gin.Context) {
 
 		//per adesso vedo banalmente se l'account corrisponde a quello di ganache che ho su metamask
 		if strings.EqualFold(user.MetamaskAddress, "0x58ad8fEA5d85EDD13C05dC116198801Ff53679B2") {
-			fmt.Println("admin logger")
 			user.Role = models.Admin
 		} else {
-			fmt.Println("user logger")
 			user.Role = models.NormalUser
 		}
 

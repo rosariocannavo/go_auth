@@ -1,4 +1,4 @@
-package redis_handler
+package redis
 
 import (
 	"fmt"

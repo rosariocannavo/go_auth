@@ -14,7 +14,7 @@ func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.GetHeader("Authorization")
 
-		fmt.Printf(tokenString + "\n")
+		//fmt.Printf(tokenString + "\n")
 
 		if tokenString == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
@@ -46,8 +46,7 @@ func Authenticate() gin.HandlerFunc {
 		}
 
 		//retrieve information based on the token - could do this in other client
-		fmt.Println("auth middleware")
-		fmt.Println("username", claims["username"])
+		//fmt.Println("username authorized", claims["username"])
 		c.Set("claims", claims)
 
 		c.Next()

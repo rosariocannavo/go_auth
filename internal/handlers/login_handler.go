@@ -10,6 +10,7 @@ import (
 	"github.com/rosariocannavo/go_auth/config"
 	"github.com/rosariocannavo/go_auth/internal/db"
 	"github.com/rosariocannavo/go_auth/internal/models"
+	"github.com/rosariocannavo/go_auth/internal/nats"
 	"github.com/rosariocannavo/go_auth/internal/repositories"
 
 	"github.com/rosariocannavo/go_auth/internal/utils"
@@ -32,7 +33,6 @@ func HandleLogin(c *gin.Context) {
 
 	fmt.Println("username", userForm.Username)
 	if errdb != nil {
-		fmt.Println("USER NOT PRESENT")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User not present"})
 		return
 	}
@@ -44,7 +44,8 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	//add metamask authentication
+	//TODO: NATS add message logging to all response
+	nats.NatsConnection.PublishMessage("ciaone")
 	c.JSON(http.StatusAccepted, gin.H{"Nonce": retrievedUser.Nonce})
 
 }
@@ -64,10 +65,6 @@ func HandleverifySignature(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
-
-	// fmt.Println("mesg " + requestData.Nonce)
-	// fmt.Println("addr " + requestData.Address)
-	// fmt.Println("sig " + requestData.Signature + "\n")
 
 	isSignatureVerified := utils.CheckSig(requestData.Address, requestData.Signature, []byte(requestData.Nonce))
 

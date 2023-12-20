@@ -32,9 +32,9 @@ func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) 
 func handleResponse(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Request) int {
 	rrw := models.NewResponseRecorderWriter(w)
 	proxy.ServeHTTP(rrw, r)
-	capturedResponse := rrw.Body.String()
+	//capturedResponse := rrw.Body.String()
 	capturedStatus := rrw.StatusCode
-	fmt.Println("captuter response", capturedResponse)
+	//fmt.Println("captured response", capturedResponse)
 	return capturedStatus
 }
 
@@ -52,7 +52,7 @@ func ProxyHandler(c *gin.Context) {
 	_, errcb := circuit_breaker.CircuitBreaker.Execute(func() (interface{}, error) { //circuite breaker here
 
 		status := handleResponse(proxy, c.Writer, c.Request)
-		fmt.Println("captured status ", status)
+		//fmt.Println("captured status ", status)
 
 		if status < 200 || status >= 300 {
 			return nil, errors.New("server error")

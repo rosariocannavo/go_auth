@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/rosariocannavo/go_auth/internal/models"
-	"github.com/rosariocannavo/go_auth/internal/redis_handler"
+	"github.com/rosariocannavo/go_auth/internal/redis"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,7 +35,7 @@ func (r *userRepo) FindUser(username string) (*models.User, error) {
 	collection := r.client.Database("my_database").Collection("users")
 
 	// Logic to fetch user from redis if present
-	cachedData, errred := redis_handler.Client.Get(context.Background(), username).Bytes()
+	cachedData, errred := redis.Client.Get(context.Background(), username).Bytes()
 	if errred != nil {
 		log.Print(errred)
 	}
@@ -44,7 +44,7 @@ func (r *userRepo) FindUser(username string) (*models.User, error) {
 		if err := bson.Unmarshal(cachedData, &retrievedUser); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Cached data:", retrievedUser)
+		//fmt.Println("Cached data:", retrievedUser)
 
 	} else {
 		//else search on db
@@ -60,7 +60,7 @@ func (r *userRepo) FindUser(username string) (*models.User, error) {
 		}
 
 		// Cache the data in Redis
-		err = redis_handler.Client.Set(context.Background(), retrievedUser.Username, dataBytes, 0).Err()
+		err = redis.Client.Set(context.Background(), retrievedUser.Username, dataBytes, 0).Err()
 		if err != nil {
 			log.Fatal(err)
 		}

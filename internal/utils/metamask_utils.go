@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -19,10 +18,10 @@ func CheckSig(from, sigHex string, msg []byte) bool {
 		sig[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
 	}
 
-	fmt.Printf("ECDSA Signature: %x\n", sig)
-	fmt.Printf("  R: %x\n", sig[0:32])  // 32 bytes
-	fmt.Printf("  S: %x\n", sig[32:64]) // 32 bytes
-	fmt.Printf("  V: %x\n", sig[64:])
+	// fmt.Printf("ECDSA Signature: %x\n", sig)
+	// fmt.Printf("  R: %x\n", sig[0:32])  // 32 bytes
+	// fmt.Printf("  S: %x\n", sig[32:64]) // 32 bytes
+	// fmt.Printf("  V: %x\n", sig[64:])
 
 	recovered, err := crypto.SigToPub(msg, sig)
 	if err != nil {

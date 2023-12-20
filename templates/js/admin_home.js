@@ -63,6 +63,10 @@ document.getElementById("setButton").addEventListener('click', async function() 
 });
 
 document.getElementById("getButton").addEventListener('click', async function() {
+    document.getElementById('response').innerHTML = '';
+    document.getElementById('bar').style.border = '';
+
+
     try {
         let account = null;
         let token = null;
