@@ -18,7 +18,7 @@ document.getElementById("getButton").addEventListener('click', async function() 
         console.log("Account:", account);
         console.log("Token:", token);
 
-        const url = `http://localhost:8080/app/getContractValue`;
+        const url = `http://localhost:8080/user/app/getContractValue`;
 
         const secondResponse = await fetch(url, {
             method: "GET",

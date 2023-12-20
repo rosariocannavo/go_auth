@@ -98,7 +98,6 @@ func HandleRegistration(c *gin.Context) {
 			user.Role = models.Admin
 		} else {
 			fmt.Println("user logger")
-
 			user.Role = models.NormalUser
 		}
 

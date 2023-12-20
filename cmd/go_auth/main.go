@@ -23,6 +23,7 @@ func main() {
 
 	// Connect to DB
 	err := db.ConnectDB()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,14 +41,6 @@ func main() {
 		c.HTML(http.StatusOK, "signup.html", gin.H{})
 	})
 
-	// r.GET("/admin_home", func(c *gin.Context) {
-	// 	c.HTML(http.StatusOK, "admin_home.html", gin.H{})
-	// })
-
-	// r.GET("/user_home", func(c *gin.Context) {
-	// 	c.HTML(http.StatusOK, "user_home.html", gin.H{})
-	// })
-
 	// Cookie endpoint to retrieve account and jwt
 	r.GET("/get-cookie", handlers.GetCookieHandler)
 
@@ -63,30 +56,39 @@ func main() {
 	//all this logic must be in the other service and protected by proxy
 	//Protected middleware User endpoints
 	userRoutes := r.Group("/user")
+
 	userRoutes.Static("/css", "../../templates/css")
 	userRoutes.Static("/js", "../../templates/js")
+
 	userRoutes.Use(middleware.Authenticate())
 	userRoutes.Use(middleware.RoleAuth("user"))
 	{
 		userRoutes.GET("/user_home", func(c *gin.Context) {
 			c.HTML(http.StatusOK, "user_home.html", gin.H{})
 		})
+
+		userRoutes.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler)
+
 	}
 
 	//Protected middleware Admin endpoints
 	adminRoutes := r.Group("/admin")
+
 	adminRoutes.Static("/css", "../../templates/css")
 	adminRoutes.Static("/js", "../../templates/js")
+
 	adminRoutes.Use(middleware.Authenticate())
 	adminRoutes.Use(middleware.RoleAuth("admin"))
 	{
 		adminRoutes.GET("/admin_home", func(c *gin.Context) {
 			c.HTML(http.StatusOK, "admin_home.html", gin.H{})
 		})
+
+		adminRoutes.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler)
 	}
 
 	//TODO: this route use the proxy + cb launched by button in login
-	r.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler) //handler of the proxyy
+	//r.GET("/app/*proxyPath", middleware.Authenticate(), handlers.ProxyHandler) //handler of the proxyy
 
 	// Run the server
 	_ = r.Run(":8080")
