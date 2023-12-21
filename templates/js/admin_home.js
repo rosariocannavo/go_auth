@@ -23,13 +23,13 @@ document.getElementById("setButton").addEventListener('click', async function() 
         console.log("Token:", token);
 
        // const newValue = Math.floor(Math.random() * (100 - 1)) + 1;
-        const newValue = parseInt(searchBar.value);
+        const productName = searchBar.value;
         searchBar.value = '';
 
-        if (Number.isInteger(newValue) && newValue > 0 && Number.MAX_SAFE_INTEGER >= newValue) {
+        if (productName !== "") {
             document.getElementById('bar').style.border = '2px solid green';
 
-            const url = `http://localhost:8080/admin/app/setContractValue?account=${account}&newvalue=${newValue}`;
+            const url = `http://localhost:8080/admin/app/registerProduct?account=${account}&productName=${productName}`;
 
             const secondResponse = await fetch(url, {
                 method: "GET",
@@ -45,15 +45,15 @@ document.getElementById("setButton").addEventListener('click', async function() 
 
             const responseData = await secondResponse.json();
             console.log(responseData);
-            console.log("updated value " + responseData.value)
-            document.getElementById("blockValue").textContent = responseData.value;
+            console.log("updated value " + responseData.productId)
+            document.getElementById("blockValue").textContent = responseData.productId;
 
             document.getElementById('response').innerHTML = '<p>Value updated on contract!</p>';
 
         } else {
             document.getElementById('bar').style.border = '2px solid red';
 
-            document.getElementById('response').innerHTML = '<p>Value must be an integer greater than 0!</p>';
+            document.getElementById('response').innerHTML = '<p>Invalid name</p>';
         }
 
     } catch (error) {

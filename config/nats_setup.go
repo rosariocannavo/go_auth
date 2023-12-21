@@ -1,5 +1,5 @@
 package config
 
-var NatsURL = "nats://nats:4222"
+var NatsURL = "nats://localhost:4222" //nats
 
 var NatsSubject = "rest_logging"

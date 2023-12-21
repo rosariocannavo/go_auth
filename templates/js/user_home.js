@@ -1,3 +1,5 @@
+const searchBar = document.querySelector('.search-bar');
+
 document.getElementById("getButton").addEventListener('click', async function() {
     try {
         let account = null;
@@ -18,7 +20,10 @@ document.getElementById("getButton").addEventListener('click', async function() 
         console.log("Account:", account);
         console.log("Token:", token);
 
-        const url = `http://localhost:8080/user/app/getContractValue`;
+        const productId = parseInt(searchBar.value);
+        searchBar.value = '';
+
+        const url = `http://localhost:8080/user/app/getProduct?productId=${productId}`;
 
         const secondResponse = await fetch(url, {
             method: "GET",
@@ -34,8 +39,8 @@ document.getElementById("getButton").addEventListener('click', async function() 
 
         const responseData = await secondResponse.json();
         console.log(responseData);
-        console.log("updated value " + responseData.value)
-        document.getElementById("blockValue").textContent = responseData.value;
+        console.log("updated value " + responseData.productId)
+        document.getElementById("blockValue").textContent = responseData.productId;
     } catch (error) {
         // Handle errors here
         console.error('There was a problem with the fetch operation:', error);
