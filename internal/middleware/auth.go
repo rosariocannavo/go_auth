@@ -3,11 +3,13 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 
 	auth "github.com/rosariocannavo/go_auth/config"
+	"github.com/rosariocannavo/go_auth/internal/nats"
 )
 
 func Authenticate() gin.HandlerFunc {
@@ -17,6 +19,10 @@ func Authenticate() gin.HandlerFunc {
 		//fmt.Printf(tokenString + "\n")
 
 		if tokenString == "" {
+
+			message := fmt.Sprintf("Timestamp: %s | Handler: %s | Status: %d | Response: %s", time.Now().UTC().Format(time.RFC3339), "middleware/Authenticate", http.StatusUnauthorized, "error: Authorization header is missing")
+			nats.NatsConnection.PublishMessage(message)
+
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
 			c.Abort()
 			return
@@ -27,6 +33,10 @@ func Authenticate() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
+
+			message := fmt.Sprintf("Timestamp: %s | Handler: %s | Status: %d | Response: %s", time.Now().UTC().Format(time.RFC3339), "middleware/Authenticate", http.StatusUnauthorized, "error: Invalid token")
+			nats.NatsConnection.PublishMessage(message)
+
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return

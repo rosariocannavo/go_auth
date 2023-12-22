@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis_rate/v10"
+	"github.com/rosariocannavo/go_auth/internal/nats"
 	"github.com/rosariocannavo/go_auth/internal/ratelimiter"
 )
 
@@ -29,6 +30,10 @@ func (r *RateLimitMiddleware) Handler() gin.HandlerFunc {
 		})
 
 		if err != nil || res.Allowed <= 0 {
+
+			message := fmt.Sprintf("Timestamp: %s | Handler: %s | Status: %d | Response: %s", time.Now().UTC().Format(time.RFC3339), "middleware/RateLimiter", http.StatusTooManyRequests, "error: Too many requests")
+			nats.NatsConnection.PublishMessage(message)
+
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
 			return
 		}

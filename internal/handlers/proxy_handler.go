@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rosariocannavo/go_auth/config"
 	"github.com/rosariocannavo/go_auth/internal/circuit_breaker"
 	"github.com/rosariocannavo/go_auth/internal/models"
+	"github.com/rosariocannavo/go_auth/internal/nats"
 )
 
 // TODO: put initialization in a separated file
@@ -32,9 +34,11 @@ func createReverseProxy(remote *url.URL, headers http.Header, proxyPath string) 
 func handleResponse(proxy *httputil.ReverseProxy, w http.ResponseWriter, r *http.Request) int {
 	rrw := models.NewResponseRecorderWriter(w)
 	proxy.ServeHTTP(rrw, r)
-	//capturedResponse := rrw.Body.String()
 	capturedStatus := rrw.StatusCode
-	//fmt.Println("captured response", capturedResponse)
+
+	message := fmt.Sprintf("Timestamp: %s | Handler: %s | Status: %d | Response: %s", time.Now().UTC().Format(time.RFC3339), "proxy_handler/handleResponse", capturedStatus, rrw.Body)
+	nats.NatsConnection.PublishMessage(message)
+
 	return capturedStatus
 }
 
@@ -52,7 +56,6 @@ func ProxyHandler(c *gin.Context) {
 	_, errcb := circuit_breaker.CircuitBreaker.Execute(func() (interface{}, error) { //circuite breaker here
 
 		status := handleResponse(proxy, c.Writer, c.Request)
-		//fmt.Println("captured status ", status)
 
 		if status < 200 || status >= 300 {
 			return nil, errors.New("server error")
