@@ -1,6 +1,6 @@
 const searchBar = document.querySelector('.search-bar');
 
-document.getElementById("setButton").addEventListener('click', async function() {
+document.getElementById("setButton").addEventListener('click', async function () {
     document.getElementById('response').innerHTML = '';
 
     try {
@@ -22,7 +22,6 @@ document.getElementById("setButton").addEventListener('click', async function() 
         console.log("Account:", account);
         console.log("Token:", token);
 
-       // const newValue = Math.floor(Math.random() * (100 - 1)) + 1;
         const productName = searchBar.value;
         searchBar.value = '';
 
@@ -45,8 +44,11 @@ document.getElementById("setButton").addEventListener('click', async function() 
 
             const responseData = await secondResponse.json();
             console.log(responseData);
-            console.log("updated value " + responseData.productId)
-            document.getElementById("blockValue").textContent = responseData.productId;
+            console.log("updated value")
+            document.getElementById("productId").textContent = responseData.productId;
+            document.getElementById("productName").textContent = responseData.productName;
+            document.getElementById("manufacturer").textContent = responseData.manufacturer;
+            document.getElementById("isRegistered").textContent = responseData.isRegistered;
 
             document.getElementById('response').innerHTML = '<p>Value updated on contract!</p>';
 
@@ -62,10 +64,9 @@ document.getElementById("setButton").addEventListener('click', async function() 
     }
 });
 
-document.getElementById("getButton").addEventListener('click', async function() {
+document.getElementById("getButton").addEventListener('click', async function () {
     document.getElementById('response').innerHTML = '';
     document.getElementById('bar').style.border = '';
-
 
     try {
         let account = null;
@@ -86,24 +87,49 @@ document.getElementById("getButton").addEventListener('click', async function() 
         console.log("Account:", account);
         console.log("Token:", token);
 
-        const url = `http://localhost:8080/admin/app/getContractValue`;
+        const productId = parseInt(searchBar.value);
+        searchBar.value = '';
 
-        const secondResponse = await fetch(url, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `${token}`
-            },
-        });
+        if (productId !== 0) {
+            document.getElementById('bar').style.border = '2px solid green';
 
-        if (!secondResponse.ok) {
-            throw new Error('Network response was not ok');
+            const url = `http://localhost:8080/admin/app/getProduct?productId=${productId}`;
+
+            const secondResponse = await fetch(url, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
+                },
+            });
+
+            if (!secondResponse.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const responseData = await secondResponse.json();
+            console.log(responseData);
+            if (response.isRegistered == false) {
+                document.getElementById("productId").textContent = "";
+                document.getElementById("productName").textContent = "";
+                document.getElementById("manufacturer").textContent = "";
+                document.getElementById("isRegistered").textContent = "false";
+                document.getElementById('response').innerHTML = '<p>Product not registered</p>';
+
+            } else {
+                document.getElementById("productId").textContent = responseData.productId;
+                document.getElementById("productName").textContent = responseData.productName;
+                document.getElementById("manufacturer").textContent = responseData.manufacturer;
+                document.getElementById("isRegistered").textContent = responseData.isRegistered;
+            }
+
+
+        } else {
+            document.getElementById('bar').style.border = '2px solid red';
+
+            document.getElementById('response').innerHTML = '<p>Invalid id</p>';
         }
 
-        const responseData = await secondResponse.json();
-        console.log(responseData);
-        console.log("updated value " + responseData.value)
-        document.getElementById("blockValue").textContent = responseData.value;
     } catch (error) {
         // Handle errors here
         console.error('There was a problem with the fetch operation:', error);

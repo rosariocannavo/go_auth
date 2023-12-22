@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Card Information</title>
-  <link rel="stylesheet" href="./css/home_styles.css">
+    <meta charset="UTF-8">
+    <title>Product Information</title>
+    <link rel="stylesheet" href="./css/home_styles.css">
 </head>
 <body>
 
 <div class="container">
-  <div class="card">
-    <h2>Block Information</h2>
-    <div class="block-info">
-      <p>Contract Value:</p> 
-      <span id="blockValue">0</span></p>
+    <div class="card">
+        <h2>Product Information</h2>
+        <div class="product-info">
+            <p><strong>Product ID:</strong> <span id="productId">-</span></p>
+            <p><strong>Product Name:</strong> <span id="productName">-</span></p>
+            <p><strong>Manufacturer:</strong> <span id="manufacturer">-</span></p>
+            <p><strong>Is Registered:</strong> <span id="isRegistered">-</span></p>
+        </div>
+        <input type="text" placeholder="Insert ID to search" class="search-bar" id="bar">
+        <div class="buttons">
+            <button id="getButton">Get</button>
+        </div>
+        <div id="response"></div>
     </div>
-    <input type="text" placeholder="Insert id to search" class="search-bar" id="bar">
-    <div class="buttons">
-      <button id="getButton">Get</button>
-    </div>
-  </div>
 </div>
 
 <script src="./js/user_home.js"></script>

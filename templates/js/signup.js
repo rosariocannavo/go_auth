@@ -1,12 +1,12 @@
 //registration form
-document.getElementById("registerForm").addEventListener("submit", async function(event) {
+document.getElementById("registerForm").addEventListener("submit", async function (event) {
     event.preventDefault();
-    
+
     const formData = new FormData(this); // 'this' refers to the form element
-    const metamaskAddress = await getMetaMaskAddress(); 
+    const metamaskAddress = await getMetaMaskAddress();
 
 
-    const password = formData.get('password'); 
+    const password = formData.get('password');
     const confirmPassword = formData.get('passwordConfirm');
 
     console.log("pwd:" + password);
@@ -22,12 +22,12 @@ document.getElementById("registerForm").addEventListener("submit", async functio
             formData.append("metamaskAddress", metamaskAddress);
 
             var object = {};
-            formData.forEach(function(value, key){
-                if(key != 'passwordConfirm') 
+            formData.forEach(function (value, key) {
+                if (key != 'passwordConfirm')
                     object[key] = value;
             });
             var json = JSON.stringify(object);
-            
+
             console.log(json)
 
             // Send POST request to your Go Gin server
@@ -38,35 +38,35 @@ document.getElementById("registerForm").addEventListener("submit", async functio
                     'Content-Type': 'application/json'
                 },
                 body: json
-    
+
             })
-            .then(response => {
-                // Handle the response as needed
-                console.log(response);
-                if(response.status === 403) {
-                    console.log("user already present");
-                    document.getElementById('username').style.border = '2px solid red';
-                    document.getElementById('passwordRegister').style.border = '2px solid red';
-                    document.getElementById('passwordConfirm').style.border = '2px solid red';
+                .then(response => {
+                    // Handle the response as needed
+                    console.log(response);
+                    if (response.status === 403) {
+                        console.log("user already present");
+                        document.getElementById('username').style.border = '2px solid red';
+                        document.getElementById('passwordRegister').style.border = '2px solid red';
+                        document.getElementById('passwordConfirm').style.border = '2px solid red';
 
-            
-                    document.getElementById('response').innerHTML = '<p>User or Address already present.</p>';
 
-                } else {
-                    window.location.href = '/';
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+                        document.getElementById('response').innerHTML = '<p>User or Address already present.</p>';
 
-            
+                    } else {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+
+
         } else {
             console.error("Metamask address not available");
             // Handle the case when Metamask address is not available
         }
 
-        
+
     } else {
         document.getElementById('passwordRegister').style.border = '2px solid red';
         document.getElementById('passwordConfirm').style.border = '2px solid red';
@@ -81,7 +81,7 @@ async function getMetaMaskAddress() {
     if (typeof window.ethereum !== 'undefined') {
         // Metamask is available
         const provider = window.ethereum;
-        
+
         try {
             // Request access to accounts
             const accounts = await provider.request({ method: 'eth_requestAccounts' });
